@@ -1,28 +1,80 @@
-import ListGroup from "./ListGroup";
 import Puntuacion from "./Puntuacion";
+import ListGroup from "./ListGroup";
+import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
+import useEffect from "react";
+import axios from "axios";
 
-function Card() {
+const card_container = {
+  height: "400px",
+  width: "300px",
+  backgroundColor: "#E3C3E3",
+};
+
+const card_image = {
+  width: "100px",
+};
+
+const Card = ( {item ,user}) => {
+  const navigate = useNavigate();
+
+  const handleClickVerMas = () => {
+    try {
+      if(user.nombreCompleto!==undefined){
+      axios
+      .put(`http://localhost:3000/AppPetSitters/petSitters/${user.email}/historial`, {nuevoHistorial:item});
+      alert('Perfil del cuidador de mascotas actualizado correctamente.');
+      }
+      else{
+      axios
+      .put(`http://localhost:3000/AppPetSitters/users/${user.email}/history`, {nuevoHistorial:item});
+      
+      }
+    } catch (error) {
+      alert('Error al actualizar perfil del cuidador de mascotas. Por favor, inténtalo nuevamente.');
+    }
+
+    navigate("/petSitter", { state: {item,user}});
+  };
+  const handleClickContactar = () => {
+    navigate("/contratar", { state: {item,user}});
+  };
+
   return (
-    <div className="card" style={({ height: "400px" }, { width: "300px" })}>
-      <div className="card-body">
-        <img style={{ width: "100px" }} src="./png/avatar.png" />
-        <h5 className="card-title">Nombre</h5>
-        <Puntuacion score={4} />
+    <div className="card" style={card_container}>
+      <div>
+        <img style={card_image} src="./png/avatar.png" />
+        <h5>{item.nombreCompleto}</h5>
+        <Puntuacion score={item.score} />
         <div style={{ display: "flex" }}>
-          <ListGroup />
-          <ListGroup />
+          <ListGroup item={item.zonas} ancho={110} />
+          <ListGroup item={item.actividades} ancho={110} />
         </div>
         <div style={{ flex: 1 }}>
-          <span href="#" className="btn btn-primary" style={{ margin: "10px" }}>
+          <button
+            href="#"
+            className="btn btn-primary"
+            style={{ margin: "10px" }}
+            onClick={handleClickVerMas}
+          >
             Ver Mas
-          </span>
-          <span href="#" className="btn btn-primary">
-            Contactar
-          </span>
+          </button>
+          <button
+            href="#"
+            className="btn btn-primary"
+            onClick={handleClickContactar}
+          >
+            Contratar
+          </button>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Card;
+
+Card.propTypes = {
+  item: PropTypes.object,
+  user: PropTypes.object
+};
